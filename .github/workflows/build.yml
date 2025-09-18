@@ -8,4 +8,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Test
-        run: echo "hello"
+        run: echo "hello 32"
