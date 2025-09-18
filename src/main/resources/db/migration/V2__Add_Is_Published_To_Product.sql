@@ -1,2 +1,1 @@
-ALTER TABLE product
-    ADD COLUMN is_published BOOLEAN DEFAULT TRUE;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS is_published BOOLEAN;
