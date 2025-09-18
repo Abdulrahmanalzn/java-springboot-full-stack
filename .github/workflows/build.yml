@@ -7,5 +7,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Test
-        run: echo "hello 32"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Maven Clean Verify
+        run: mvn -B -ntb clean verify
