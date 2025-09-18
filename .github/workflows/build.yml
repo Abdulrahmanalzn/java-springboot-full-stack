@@ -1,18 +1,45 @@
 name: Build workflow
+
 on:
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: appdb
+        # healthcheck so the job waits until Postgres is ready
+        options: >-
+          --health-cmd="pg_isready -U postgres -d appdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: JDK
+
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '21'
+          cache: maven
+
       - name: Maven Clean Verify
-        run: mvn -B -ntp clean verify
+        run: ./mvnw -B -ntp clean verify
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appdb
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          # uncomment the next line once if Flyway complains about existing schema without history table
+          # SPRING_FLYWAY_BASELINE_ON_MIGRATE: 'true'
