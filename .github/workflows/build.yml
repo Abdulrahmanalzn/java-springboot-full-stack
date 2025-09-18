@@ -10,14 +10,14 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: appdb
+          POSTGRES_PASSWORD: 0000
+          POSTGRES_DB: jfs
         # healthcheck so the job waits until Postgres is ready
         options: >-
-          --health-cmd="pg_isready -U postgres -d appdb"
+          --health-cmd="pg_isready -U postgres -d jfs"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -38,8 +38,8 @@ jobs:
       - name: Maven Clean Verify
         run: ./mvnw -B -ntp clean verify
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/appdb
+          SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jfs
           SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_DATASOURCE_PASSWORD: 0000
           # uncomment the next line once if Flyway complains about existing schema without history table
           # SPRING_FLYWAY_BASELINE_ON_MIGRATE: 'true'
