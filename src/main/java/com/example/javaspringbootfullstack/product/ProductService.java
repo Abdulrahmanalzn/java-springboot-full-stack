@@ -56,7 +56,7 @@ public class ProductService {
                 product.stockLevel()
         );
         productRepository.save(newProduct);
-        return null;
+        return id;
     }
 
     public void updateProduct(UUID id,
