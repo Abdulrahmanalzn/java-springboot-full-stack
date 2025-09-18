@@ -1,4 +1,4 @@
-package com.example.javaspringbootfullstack.product;
+package com.example.javaspringbootfullstack;
 
 import org.flywaydb.core.Flyway;
 import org.testcontainers.containers.PostgreSQLContainer;
