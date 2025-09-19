@@ -32,7 +32,7 @@ jobs:
           java-version: '21'
       - name: Generate Build Number
         run: |
-          if [-n "${{github.event.inputs.build_number ==''}}" ]; then
+          if [ -n "${{github.event.inputs.build_number ==''}}" ]; then
            BUILD_NUMBER=${{github.event.inputs.build_number ==''}}
            ehco "using provided build number: $BUILD_NUMBER"
           else
