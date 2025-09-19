@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       build_number:
-        description: "the build number to deploy (optional"
+        description: "the build number to deploy (optional)"
         required: false
         type: string
 jobs:
@@ -33,7 +33,7 @@ jobs:
       - name: Generate Build Number
         run: |
           if [-n "${{github.event.inputs.build_number ==''}}" ]; then
-           BUILD_NUMBER= ${{github.event.inputs.build_number ==''}}
+           BUILD_NUMBER=${{github.event.inputs.build_number ==''}}
            ehco "using provided build number: $BUILD_NUMBER"
           else
             BUILD_NUMBER=$(date +'%d%m%Y%H%M%S')
