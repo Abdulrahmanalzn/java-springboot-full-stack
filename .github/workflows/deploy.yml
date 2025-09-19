@@ -1,15 +1,14 @@
 name: Deploy Workflow
-
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       build_number:
         description: "the build number to deploy (optional)"
         required: false
         type: string
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -22,84 +21,54 @@ jobs:
       EC2_PUBLIC_IP_ADDRESS: ${{ secrets.EC2_PUBLIC_IP_ADDRESS }}
 
     steps:
-      # ALWAYS checkout
       - name: Checkout
+        if: ${{github.event.inputs.build_number ==''}}
         uses: actions/checkout@v4
-
-      # Decide BUILD_NUMBER (input wins; else generate timestamp)
-      - name: Resolve build number
+      - name: JDK
+        if: ${{github.event.inputs.build_number ==''}}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Generate Build Number
         run: |
-          if [ -n "${{ github.event.inputs.build_number }}" ]; then
-            BUILD_NUMBER="${{ github.event.inputs.build_number }}"
-            echo "Using provided build number: $BUILD_NUMBER"
+          if [ -n "${{github.event.inputs.build_number }}" ]; then
+           BUILD_NUMBER=${{github.event.inputs.build_number }}
+           echo "using provided build number: $BUILD_NUMBER"
           else
-            BUILD_NUMBER="$(date +'%d%m%Y%H%M%S')"
-            echo "Using generated build number: $BUILD_NUMBER"
+            BUILD_NUMBER=$(date +'%d%m%Y%H%M%S')
+            echo "using generated build number: $BUILD_NUMBER"
           fi
-          echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
-          echo "Final Build Number: $BUILD_NUMBER"
-
-      # If a build number is provided, optionally verify the image exists on Docker Hub
-      - name: Check provided image exists (only when input provided)
-        if: ${{ github.event.inputs.build_number != '' }}
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "Generated Build Number: $BUILD_NUMBER"
+      - name: Check if provided docker image exists
+        if: ${{github.event.inputs.build_number != ''}}
         run: |
-          IMAGE_NAME="${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:$BUILD_NUMBER"
-          echo "Checking if $IMAGE_NAME exists on Docker Hub..."
-          if docker manifest inspect "$IMAGE_NAME" > /dev/null 2>&1; then
-            echo "Image found: $IMAGE_NAME"
-          else
-            echo "ERROR: Image not found: $IMAGE_NAME"
-            exit 1
+          IMAGE_NAME="${{env.DOCKER_USERNAME}}"/"${{env.DOCKER_IMAGE_NAME}}:$BUILD_NUMBER"
+          echo "checking if $IMAGE_NAME exists"
+          if docker mainfest inspect "$IMAGE_NAME" > /dev/null/2>&1; then
+          echo "provided image $IMAGENAME does not exists. esiting..."
           fi
-
-      # Login for either pushing (build path) or pulling during deploy
+          echo "provided image $IMAGENAME exists"
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-
-      # ===== BUILD PATH (only if NO build_number provided) =====
-      - name: Set up JDK 21 (build path only)
-        if: ${{ github.event.inputs.build_number == '' }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: maven
-
-      - name: Make mvnw executable (build path only)
-        if: ${{ github.event.inputs.build_number == '' }}
-        run: chmod +x mvnw || true
-
-      - name: Build, test, and push image with Jib (build path only)
-        if: ${{ github.event.inputs.build_number == '' }}
-        run: |
-          # Use Jib to build & push; requires jib plugin in pom.xml
-          mvn -B -ntp clean verify jib:build -Ddocker.image.tag="$BUILD_NUMBER"
-
-      # ===== DEPLOY (both paths) =====
+      - name: Maven Clean Verify
+        run: mvn -B -ntp clean verify jib:build -Ddocker.image.tag=$BUILD_NUMBER
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ env.EC2_SSH_PRIVATE_KEY }}
-
-      - name: SSH to EC2 and deploy
+           ssh-private-key: ${{ env.EC2_SSH_PRIVATE_KEY }}
+      - name: SSH To EC2 and Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@"$EC2_PUBLIC_IP_ADDRESS" << 'EOF'
-          set -euxo pipefail
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_PUBLIC_IP_ADDRESS << EOF
           cd ~
-          # Update tag in compose file (assumes docker-compose.yml already present)
-          sed -i "s|image: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:.*$|image: ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}|" docker-compose.yml
-          # Pull and (re)start only the app service
-          docker compose pull || docker-compose pull
-          docker compose up -d ${DOCKER_COMPOSE_APP_SERVICE_NAME} || docker-compose up -d ${DOCKER_COMPOSE_APP_SERVICE_NAME}
+          sed -i 's|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':.*$|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':'"$BUILD_NUMBER"'|' docker-compose.yml
+          docker-compose pull 
+          docker-compose up -d '$DOCKER_COMPOSE_APP_SERVICE_NAME'
           docker image prune -f
-          echo "${BUILD_NUMBER}" > build-number.txt
           docker ps
+          echo "$BUILD_NUMBER" > build-number.txt
           EOF
-        env:
-          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
-          DOCKER_USERNAME: ${{ env.DOCKER_USERNAME }}
-          DOCKER_IMAGE_NAME: ${{ env.DOCKER_IMAGE_NAME }}
-          DOCKER_COMPOSE_APP_SERVICE_NAME: ${{ env.DOCKER_COMPOSE_APP_SERVICE_NAME }}
