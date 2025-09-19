@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       build_number:
-        description: "the build number to deploy (optional)"
+        description: "The build number to deploy (optional)"
         required: false
         type: string
 jobs:
