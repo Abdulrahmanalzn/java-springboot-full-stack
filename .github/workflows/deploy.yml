@@ -57,7 +57,6 @@ jobs:
          echo "provided image $IMAGE_NAME exits ✅"
       - name: Maven Clean Verify
         run: mvn -B -ntp clean verify jib:build -Ddocker.image.tag=$BUILD_NUMBER
-        working-directory: .
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
