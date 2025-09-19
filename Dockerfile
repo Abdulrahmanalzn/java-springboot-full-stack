@@ -4,9 +4,9 @@ ARG JAVA_VERSION=21
 # Stage 1: Build the application
 FROM maven:3.9.4 AS builder
 WORKDIR /app
-COPY ../../java-springboot-full-stack/pom.xml .
+COPY pom.xml .
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn clean package
 
 # Stage 2: Run the application
 FROM openjdk:${JAVA_VERSION}-jdk-slim
