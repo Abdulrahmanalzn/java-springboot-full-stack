@@ -1,8 +1,9 @@
 services:
   product-service:
     container_name: product-service
-    image: mrtrlle/product-service
-
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/jfs
       SPRING_DATASOURCE_USERNAME: postgres
