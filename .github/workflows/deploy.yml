@@ -34,10 +34,10 @@ jobs:
         run: |
           if [ -n "${{github.event.inputs.build_number }}" ]; then
            BUILD_NUMBER=${{github.event.inputs.build_number }}
-           ehco "using provided build number: $BUILD_NUMBER"
+           echo "using provided build number: $BUILD_NUMBER"
           else
             BUILD_NUMBER=$(date +'%d%m%Y%H%M%S')
-            ehco "using generated build number: $BUILD_NUMBER"
+            echo "using generated build number: $BUILD_NUMBER"
           fi
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
           echo "Generated Build Number: $BUILD_NUMBER"
