@@ -40,21 +40,21 @@ jobs:
            echo "using generated build number: $BUILD_NUMBER"
           fi
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
-      - name: Check if provided docker image exists
-        if: ${{ github.event.inputs.build_number != '' }}
-        run: |
-          IMAGE_NAME="${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:$BUILD_NUMBER"
-          echo "checking if $IMAGE_NAME exists"
-          if ! docker manifest inspect "$IMAGE_NAME" > /dev/null 2>&1; then
-            echo "provided image $IMAGE_NAME does not exits. exiting..."
-            exit 1
-          fi
-          echo "provided image $IMAGE_NAME exits ✅"
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
+      - name: Check if provided docker image exists
+        if: ${{ github.event.inputs.build_number != '' }}
+        run: |
+         IMAGE_NAME="${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:$BUILD_NUMBER"
+         echo "checking if $IMAGE_NAME exists"
+         if ! docker manifest inspect "$IMAGE_NAME" > /dev/null 2>&1; then
+         echo "provided image $IMAGE_NAME does not exits. exiting..."
+         exit 1
+         fi
+         echo "provided image $IMAGE_NAME exits ✅"
       - name: Maven Clean Verify
         run: mvn -B -ntp clean verify jib:build -Ddocker.image.tag=$BUILD_NUMBER
         working-directory: .
@@ -65,12 +65,11 @@ jobs:
       - name: SSH To EC2 and Deploy
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@$EC2_PUBLIC_IP_ADDRESS << EOF
-          cd ~
-          sed -i 's|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':.*$|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':'"$BUILD_NUMBER"'|' docker-compose.yml
-          docker-compose pull 
-          docker-compose up -d '$DOCKER_COMPOSE_APP_SERVICE_NAME'
-          docker image prune -f
-          echo "heyyy"
-          docker ps
-          echo "$BUILD_NUMBER" > build-number.txt
+            cd ~
+            sed -i 's|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':.*$|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':'"$BUILD_NUMBER"'|' docker-compose.yml
+            docker-compose pull
+            docker-compose up -d '$DOCKER_COMPOSE_APP_SERVICE_NAME'
+            docker image prune -f
+            docker ps
+            echo "$BUILD_NUMBER" > build-number.txt
           EOF
