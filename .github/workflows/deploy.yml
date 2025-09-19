@@ -69,6 +69,7 @@ jobs:
           docker-compose pull 
           docker-compose up -d '$DOCKER_COMPOSE_APP_SERVICE_NAME'
           docker image prune -f
+          echo "heyyy"
           docker ps
           echo "$BUILD_NUMBER" > build-number.txt
           EOF
