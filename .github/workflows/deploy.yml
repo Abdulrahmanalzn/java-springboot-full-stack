@@ -55,9 +55,7 @@ jobs:
          exit 1
          fi
          echo "provided image $IMAGE_NAME exits ✅"
-      - name: Clean & Package
-        if: ${{ github.event.inputs.build_number != '' }}
-        run: mvn -B -ntp clean package
+
       - name: Maven Clean Verify
         run: mvn -B -ntp clean verify jib:build -Ddocker.image.tag=$BUILD_NUMBER
       - name: Setup SSH Agent
