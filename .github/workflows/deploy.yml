@@ -42,7 +42,6 @@ jobs:
       - name: SSH To EC2 and Deploy
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@$EC2_PUBLIC_IP_ADDRESS << EOF
-          ls 
-          pwd
-          echo "testing hello" > hello.txt
+          cd ~
+          sed -i 's|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':.*$|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':'"$BUILD_NUMBER"'|' docker-compose.yml
           EOF
