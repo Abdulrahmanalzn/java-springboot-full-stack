@@ -68,14 +68,12 @@ jobs:
           ssh-private-key: ${{ env.EC2_SSH_PRIVATE_KEY }}
       - name: SSH To EC2 and Deploy
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":":cloud: Deploying to AWS EC2..."}' ${{ env.SLACK_WEBHOOK_URL }}
-          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_PUBLIC_IP_ADDRESS << EOF
-            cd ~
-            sed -i 's|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':.*$|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':'"$BUILD_NUMBER"'|' docker-compose.yml
-            docker-compose pull
-            docker-compose up -d '$DOCKER_COMPOSE_APP_SERVICE_NAME'
-            docker image prune -f
-            docker ps
-            echo "$BUILD_NUMBER" > build-number.txt
-          EOF
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\":tada: Successfully deployed to AWS EC2\"}" ${{ env.SLACK_WEBHOOK_URL }}
+            ssh -o StrictHostKeyChecking=no ec2-user@$EC2_PUBLIC_IP_ADDRESS << EOF
+              cd ~
+              sed -i 's|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':.*$|image: '"$DOCKER_USERNAME"'/'"$DOCKER_IMAGE_NAME"':'"$BUILD_NUMBER"'|' docker-compose.yml
+              docker-compose pull
+              docker-compose up -d '$DOCKER_COMPOSE_APP_SERVICE_NAME'
+              docker image prune -f
+              docker ps
+              echo "$BUILD_NUMBER" > build-number.txt
+            EOF
