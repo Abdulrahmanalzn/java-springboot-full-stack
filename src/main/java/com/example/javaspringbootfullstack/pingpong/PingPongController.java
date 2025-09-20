@@ -10,6 +10,6 @@ public class PingPongController {
 
     @GetMapping
     public String pingPong(){
-        return "Pong";
+        return "Pong version: ${{20092025084212}}";
     }
 }
