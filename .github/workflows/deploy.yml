@@ -43,7 +43,7 @@ jobs:
             else
               BUILD_NUMBER=$(date +'%d%m%Y%H%M%S')
               echo "using generated build number: $BUILD_NUMBER"
-              curl -X POST -H 'Content-type: application/json' --data '{"text":"a new build number generated: $BUILD_NUMBER "}'   ${{ env.SLACK_WEBHOOK_URL }}
+              curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"A new build number generated: $BUILD_NUMBER\"}" \   ${{ env.SLACK_WEBHOOK_URL }}
             fi
             echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
       - name: Login to Docker Hub
