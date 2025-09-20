@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/ping")
 public class PingPongController {
 
-//    @GetMapping
-//    public String pingPong(){
-//        return "Pong";
-//    }
+    @GetMapping
+    public String pingPong(){
+        return "Pong";
+    }
 }
