@@ -32,16 +32,14 @@ jobs:
           java-version: '21'
       - name: Generate Build Number
         run: |
-          if [ -n "${{ github.event.inputs.build_number }}" ]; then
-            BUILD_NUMBER=${{ github.event.inputs.build_number }}
-            echo "using provided build number: $BUILD_NUMBER"
-            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\":package: Using provided build number: $BUILD_NUMBER\"}" ${{ env.SLACK_WEBHOOK_URL }}
-          else
-            BUILD_NUMBER=$(date +'%d%m%Y%H%M%S')
-            echo "using generated build number: $BUILD_NUMBER"
-            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\":gear: Generated new build number: $BUILD_NUMBER\"}" ${{ env.SLACK_WEBHOOK_URL }}
-          fi
-          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+            if [ -n "${{ github.event.inputs.build_number }}" ]; then
+              BUILD_NUMBER=${{ github.event.inputs.build_number }}
+              echo "using provided build number: $BUILD_NUMBER"
+            else
+              BUILD_NUMBER=$(date +'%d%m%Y%H%M%S')
+              echo "using generated build number: $BUILD_NUMBER"
+            fi
+            echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
