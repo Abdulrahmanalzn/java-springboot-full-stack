@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/ping")
 public class PingPongController {
 
-    @GetMapping
+    @GetMapping(produces = "text/html")  // tell Spring to return HTML
     public String pingPong(){
-        return "Pong version: ${{20092025084212}}";
+        return "<h1 style='color:red; font-size:40px;'>I love u dhauooooo</h1>";
     }
 }
