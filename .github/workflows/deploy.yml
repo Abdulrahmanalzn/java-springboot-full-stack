@@ -69,11 +69,21 @@ jobs:
       - name: Maven Clean Verify
         if: ${{ github.event.inputs.build_number == '' }}
         run: |
-          curl -X POST -H 'Content-type:
-          application/json' --data "{\"text\":\":hammer_and_wrench: Building and deploying to Docker Hub...\"}" ${{ env.SLACK_WEBHOOK_URL }}
-          mvn -B -ntp clean verify jib:build -Ddocker.image.tag=$BUILD_NUMBER
-          curl -X POST -H 'Content-type:
-          application/json' --data "{\"text\":\":white_check_mark: Successfully built and pushed to Docker Hub\"}" ${{ env.SLACK_WEBHOOK_URL }}
+          set -e
+
+          # Notify start
+          curl -sSf -X POST \
+            -H "Content-type: application/json" \
+            --data "{\"text\":\":hammer_and_wrench: Building and pushing tag *$BUILD_NUMBER*...\"}" \
+            "${{ env.SLACK_WEBHOOK_URL }}"
+
+          mvn -B -ntp clean verify jib:build -Ddocker.image.tag="$BUILD_NUMBER"
+
+          # Notify success
+          curl -sSf -X POST \
+            -H "Content-type: application/json" \
+            --data "{\"text\":\":white_check_mark: Successfully built and pushed tag *$BUILD_NUMBER*\"}" \
+            "${{ env.SLACK_WEBHOOK_URL }}"
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
