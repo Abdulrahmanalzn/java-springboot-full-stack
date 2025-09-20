@@ -27,7 +27,7 @@ jobs:
       - name: Send slack message with github commit url
         run: >
           curl -X POST -H 'Content-type: application/json'
-          --data '{"text":"${{ github.event.head_commit.message }} - https://${{ github.repository }}/commit/${{ github.sha }}"}' 
+          --data '{"text":"${{ github.event.head_commit.message }} - https://github.com/${{ github.repository }}/commit/${{ github.sha }}"}' 
           ${{ env.SLACK_WEBHOOK_URL }}
       - name: JDK
         if: ${{ github.event.inputs.build_number == '' }}
