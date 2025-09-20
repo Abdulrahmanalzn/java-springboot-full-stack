@@ -10,6 +10,6 @@ public class PingPongController {
 
     @GetMapping(produces = "text/html")  // tell Spring to return HTML
     public String pingPong(){
-        return "<h1 style='color:red; font-size:40px;'>I love u dhauooooo</h1>";
+        return "<h1 style='color:red; font-size:40px;'>❤ I love u dhauooooo ❤ </h1>";
     }
 }
