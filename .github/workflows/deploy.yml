@@ -48,16 +48,13 @@ jobs:
       - name: Check if provided docker image exists
         if: ${{ github.event.inputs.build_number != '' }}
         run: |
-          IMAGE="${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:$BUILD_NUMBER"
-          echo "checking if $IMAGE exists"
-          if ! docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
-            echo "provided image $IMAGE does not exist. exiting..."
-            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\":x: :warning: Provided image $IMAGE does not exist! Exiting deployment...\"}" ${{ env.SLACK_WEBHOOK_URL }}
-            exit 1
-          fi
-          echo "provided image $IMAGE exists ✅"
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\":white_check_mark: Image $IMAGE exists and ready for deployment\"}" ${{ env.SLACK_WEBHOOK_URL }}
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+            IMAGE_NAME="${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:$BUILD_NUMBER"
+            echo "checking if $IMAGE_NAME exists"
+            if ! docker manifest inspect "$IMAGE_NAME" > /dev/null 2>&1; then
+              echo "provided image $IMAGE_NAME does not exits. exiting..."
+              exit 1
+            fi
+            echo "provided image $IMAGE_NAME exits ✅"
 
       - name: Maven Clean Verify
         if: ${{ github.event.inputs.build_number == '' }}
